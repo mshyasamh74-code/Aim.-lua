@@ -1,0 +1,26 @@
+local P, R, U, W = game:GetService("Players"), game:GetService("RunService"), game:GetService("UserInputService"), workspace
+local LP, Cam, Key, On = P.LocalPlayer, W.CurrentCamera, Enum.KeyCode.E, false
+
+U.InputBegan:Connect(function(i, g) if not g and i.KeyCode == Key then On = not On end end)
+
+local function getTarget()
+    local t, d = nil, 150
+    for _, v in ipairs(P:GetPlayers()) do
+        if v ~= LP and (v.Team ~= LP.Team) and v.Character and v.Character:FindFirstChild("Head") then
+            local p, vis = Cam:WorldToViewportPoint(v.Character.Head.Position)
+            local m = (Vector2.new(p.X, p.Y) - U:GetMouseLocation()).Magnitude
+            if vis and m < d then t, d = v.Character.Head, m end
+        end
+    end
+    return t
+end
+
+R.RenderStepped:Connect(function()
+    if On then
+        local target = getTarget()
+        if target then
+            local pos = target.Position + (target.Parent.HumanoidRootPart.Velocity * 0.12)
+            Cam.CFrame = Cam.CFrame:Lerp(CFrame.new(Cam.CFrame.Position, pos), 0.2)
+        end
+    end
+end)
